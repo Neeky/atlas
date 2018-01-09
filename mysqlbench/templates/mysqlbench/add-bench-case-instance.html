@@ -1,0 +1,83 @@
+{% extends 'users/users.html' %}
+
+{% block title %}
+蒋乐哥哥的官方分享--测试用例实例增加
+{% endblock%}
+
+
+
+{% block article %}
+                <div style="min-height:120px;"></div>
+                <div class="col-md-6 col-md-offset-3">
+                <form class="form form-horizontal" method="post" action="{% url 'mysqlbench:add-bench-case-instance' %}">
+                        {% csrf_token %} 
+                        {{ form.errors }}                       
+                        <div class="form-group">
+                            <label for="id_host_info" class="col-md-2 text-left">主机信息：</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" id="id_host_info" name="host_info" placeholder="阿里云linux虚拟主机"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_mysql_version" class="col-md-2 text-left">MySQL版本:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" id="id_mysql_version" name="mysql_version" placeholder="mysql-5.7.20"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_variable_name" class="col-md-2 text-left">变量名:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" id="id_variable_name" name="variable_name" placeholder="innodb_buffer_pool_size"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_bench_type" class="col-md-2 text-left">测试类型:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" id="id_bench_type" name="bench_type" placeholder="oltp_insert"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_worker" class="col-md-2 text-left">并行度:</label>
+                            <div class="col-md-10">
+                                <input type="number" class="form-control" id="id_worker" name="worker" placeholder="1"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_variable_value" class="col-md-2 text-left">参数值:</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" id="id_variable_value" name="variable_value" placeholder=""/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_tps" class="col-md-2 text-left">tps:</label>
+                            <div class="col-md-10">
+                                <input type="number" class="form-control" id="id_tps" name="truncations_per_seconde" placeholder=""/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_qps" class="col-md-2 text-left">qps:</label>
+                            <div class="col-md-10">
+                                <input type="number" class="form-control" id="id_qps" name="query_per_seconde" placeholder=""/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_duration" class="col-md-2 text-left">测试时长:</label>
+                            <div class="col-md-10">
+                                <input type="number" class="form-control" id="id_duration" name="duration" placeholder=""/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 col-md-offset-4">
+                            <button type="submit" class="btn btn-primary ">提交测试用例实例</button>
+                        </div> 
+                </form>
+                </div>
+{% endblock %}

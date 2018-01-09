@@ -1,2 +1,4 @@
 from .host import HostInfo
-from .mark import TestItem,ParraleTestItem,TaskInfo
+from .mark import BenchCase,BenchCaseInstance
+
+__all__=['HostInfo','BenchCase','BenchCaseInstance']

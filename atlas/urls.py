@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'favicon.ico',icon),
     url(r'^admin/', admin.site.urls),
     url(r'^users/',include('users.urls',namespace='users')),
+    url(r'^mysqlbench/',include('mysqlbench.urls',namespace='mysqlbench')),
 ]

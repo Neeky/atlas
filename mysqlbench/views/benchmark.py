@@ -1,0 +1,131 @@
+from django.http import HttpResponse
+from django.http.request import QueryDict
+from django.shortcuts import render,redirect
+from django.views import View
+from django.db.models import Q
+
+from mysqlbench.models import HostInfo,BenchCase,BenchCaseInstance
+
+from mysqlbench.forms import HostInfoForm,BenchCaseForm,BenchCaseInstanceForm
+
+__all__=['HostInfoAddition','BenchCaseAddition','BenchCaseInstanceAddition']
+
+
+class HostInfoAddition(View):
+    """
+    录入主机信息
+    """
+    def get(self,request):
+        """
+        如果是get 方法就引导用户到增加测试结果的页面
+        add/host/info/
+        """
+        return render(request,'mysqlbench/add-host-info.html',context=None,content_type="text/html")
+
+    def post(self,request):
+        """
+        """
+        form = HostInfoForm(request.POST)
+        print(request.POST)
+        #print(form.cleaned_data['name'])
+        if form.is_valid():
+            form.save()
+            return render(request,'mysqlbench/add-host-info-success.html',context=None,content_type="text/html")
+        #return HttpResponse("sucess ...")
+        else:
+            return HttpResponse(form.cleaned_data)
+
+
+class BenchCaseAddition(View):
+    """
+    add/bench/case/
+    """
+    def get(self,request):
+        """
+        """
+        return render(request,'mysqlbench/add-bench-case.html',context=None,content_type="text/html")
+
+    def post(self,request):
+        """
+        增加测试用例信息
+        1、由request.POST.get('host_info') 得到HostInfo对象
+        """
+        name = request.POST.get('host_info',None)
+        if name != None:
+            """
+            说明有提交host_info信息、可以进行一下步的处理
+            """
+            try:
+                host_info = HostInfo.objects.get(name=name)
+            except HostInfo.DoesNotExist:
+                return HttpResponse('HostInfo.name={0} 的主机不存在'.format(name))
+            id = host_info.id
+            query_dict = request.POST.copy()
+            query_dict.setlist('host_info',[id,])
+            request.POST=query_dict
+
+        form = BenchCaseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return render(request,'mysqlbench/add-bench-case-success.html',context=None,content_type="text/html")
+        else:
+            print(form.errors)
+            return render(request,'mysqlbench/add-bench-case.html',context={'form':form},content_type="text/html")
+        
+
+class BenchCaseInstanceAddition(View):
+    """
+    增加测试用例实例
+    """
+    def get(self,request):
+        """
+        """
+        return render(request,'mysqlbench/add-bench-case-instance.html',context=None,content_type="text/html")
+
+    def post(self,request):
+        """
+        录入测试用例实例
+        1:由post中的host_info来确认主机的id
+        2:加上mysql_version、variable_name、bench_type 来确认benchCase
+        3:增加测试用例的实例
+        """
+        #由主机名转换到id值
+        host_info_name = request.POST.get('host_info',None)
+        #让request.POST支持读写
+        post_data = request.POST.copy()
+        request.POST=post_data
+        request.POST.pop('host_info')
+        #说明host_info是存在的、那么就要从host_info中解析出id值
+        if host_info_name != None:
+            try:
+                host_info=HostInfo.objects.get(name=host_info_name)
+            except HostInfo.DoesNotExist:
+                return HttpResponse('HostInfo.name={0} 的主机不存在'.format(name))
+            host_info_id = host_info.id
+            #通过host_info_id,mysql_version,variable_name,bench_type确定bench-case-instance对应的bench-case
+            mysql_version=request.POST.get('mysql_version',None)
+            request.POST.pop('mysql_version')
+            variable_name=request.POST.get('variable_name',None)
+            request.POST.pop('variable_name')
+            bench_type   = request.POST.get('bench_type',None)
+            request.POST.pop('bench_type')
+            #获取bench-case
+            try:
+                bench_case = BenchCase.objects.get(Q(host_info=host_info_id),
+                                        Q(mysql_version=mysql_version),Q(variable_name=variable_name),Q(bench_type=bench_type))
+            except BenchCase.DoesNotExist:
+                return HttpResponse('benchcase 不存在')
+            #设置bench-case的值
+            request.POST.setlist('bench_case',[bench_case.id])
+            form = BenchCaseInstanceForm(request.POST)
+            if form.is_valid():
+                form.save()
+            return HttpResponse("the end")
+            
+            
+
+
+
+        
+
+        
