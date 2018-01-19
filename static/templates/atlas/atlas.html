@@ -13,8 +13,7 @@
 
     <body>
         <div class="container">
-
-
+            <header>
 {% block nav %}
             <div class="row">
                 <div class="masthead">
@@ -53,20 +52,16 @@
                     </ul>
                     </nav>
                 </div>
-            </div>
-{% endblock %}
+                </div>
+{% endblock %}           
+            </header>
 
-
-            <div class="row">
 {% block article %}
-
+    
 {% endblock %}
-            </div>
-
-
-
-
         </div>
+
+
 
         <script src="{% static './atlas/js/jquery-3.2.1.min.js' %}"></script>
         <script src="{% static './atlas/css/bootstrap/js/bootstrap.min.js' %}"></script>

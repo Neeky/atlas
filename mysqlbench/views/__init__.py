@@ -1,1 +1,4 @@
-from .benchmark import HostInfoAddition,BenchCaseAddition,BenchCaseInstanceAddition
+from .benchmark import HostInfoAddition,BenchCaseAddition,BenchCaseInstanceAddition,BenchCaseJsonApi,BenchCaseReport,MultiWorkerJsonApi,BenchCaseMultiReport
+
+
+

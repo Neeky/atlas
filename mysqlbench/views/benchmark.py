@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.http.request import QueryDict
 from django.shortcuts import render,redirect
 from django.views import View
@@ -8,7 +8,7 @@ from mysqlbench.models import HostInfo,BenchCase,BenchCaseInstance
 
 from mysqlbench.forms import HostInfoForm,BenchCaseForm,BenchCaseInstanceForm
 
-__all__=['HostInfoAddition','BenchCaseAddition','BenchCaseInstanceAddition']
+__all__=['HostInfoAddition','BenchCaseAddition','BenchCaseInstanceAddition','BenchCaseReport','MultiWorkerJsonApi','BenchCaseMultiReport']
 
 
 class HostInfoAddition(View):
@@ -122,7 +122,105 @@ class BenchCaseInstanceAddition(View):
                 form.save()
             return HttpResponse("the end")
             
+class BenchCaseReport(View):
+    def get(self,request):
+        """
+        """
+        print(request.GET)
+        variable_name=request.GET.get('variable_name','test_in_BenchCaseReport(View)')
+        return render(request,'mysqlbench/bench-case-report.html',context={ 'variable_name':variable_name},content_type="text/html")
+
+class BenchCaseMultiReport(View):
+    def get(self,request):
+        """
+        """
+        print(request.GET)
+        variable_name=request.GET.get('variable_name','test_in_BenchCaseReport(View)')
+        variable_value=request.GET.get('variable_value','test_in_BenchCaseMultiReport(View)')
+        return render(request,'mysqlbench/bench-case-parallel-report.html',context={ 'variable_name':variable_name,'variable_value':variable_value},content_type="text/html")
+
+class BenchCaseJsonApi(View):
+    def get(self,request):
+        """
+        生成报表页面
+        """
+        result={}
+        #先从请求的报文中解析出mysql_version,variable_name
+        mysql_version = request.GET.get('mysql_version','mysql-5.7.21')
+        variable_name = request.GET.get('variable_name','log_bin')
+        #找到对应的benchcase select_related().
+        bench_cases = BenchCase.objects.filter(Q(mysql_version=mysql_version),Q(variable_name=variable_name))
+        #缓存
+        [bc for bc in bench_cases]
+        bench_types = [bc.bench_type for bc in bench_cases]
+        #填充标题、填充图例
+        result['legend1']=bench_types
+        result['title1'] ="{0} 各取值对性能的影响程度".format(variable_name)
+        #
+        variable_values = []
+        tpss=[]
+        series=[]
+        for bc in bench_cases:
+            s={}
+            s['name']=bc.bench_type
+            s['type']='bar'
+            s['barMaxWidth']=20
+            instance = bc.instances.filter(workers=1)
+            variable_values=[i.variable_value for i in instance]
+            tpss = [i.truncations_per_seconde for i in instance]
+            s['data']=tpss
+            series.append(s)
+        result['series1']=series
+        result['xdata1']=variable_values
+        result['ydata1']=tpss
+        
+        return JsonResponse(result)
+        
+
+class MultiWorkerJsonApi(View):
+    def get(self,request):
+        """
+        从get中得到的参数有variable_name,variable_value
+        
+        """
+        result={} 
+        variable_name=request.GET.get('variable_name','log_bin')
+        variable_value = request.GET.get('variable_value',None) 
+        if variable_value == None:
+            print('variable_value=None      ----   will set it to off')
+            variable_value='off'
+        print('this is 1 ------')
+        bcs = BenchCase.objects.filter(variable_name=variable_name)
+        bench_types = [x.bench_type for x in bcs]
+        result['legend']=bench_types
+        result['title']="{0}={1} 多线程下的tps表现".format(variable_name,variable_value)
+        result['series']=[]
+        print('this is 2 ------')
+        for bc in bcs:
+            serie={'name':bc.bench_type,'type':'line',}
+            print('this is 3 ------')
+            bcis = BenchCaseInstance.objects.filter(bench_case=bc,variable_value=variable_value).order_by('workers')
+            workers = [bci.workers for bci in bcis]
+            tps = [bci.truncations_per_seconde for bci in bcis]
+            result['workers']=workers
+            serie['data']=tps
+            result['series'].append(serie)
+        print(result)
+        return JsonResponse(result)
+
+
+
+
+
             
+
+
+
+
+
+        
+        
+
 
 
 

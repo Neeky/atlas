@@ -1,0 +1,77 @@
+{% extends 'atlas/atlas.html'%}
+
+{% block title %}
+蒋乐哥哥的官方分享--性能测试报告
+{% endblock%}
+
+{% block article %}
+            <div class="row">
+                <div class="col-md-12" id="config_report" style="min-height:400px"></div>
+                <div class="col-md-12" id="parallel_report" style="min-height:400px"></div>
+            </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+        <script>
+            var config_report_es = echarts.init(document.getElementById('config_report'));
+            $.get("http://127.0.0.1:8080/mysqlbench/bench/case/parallel/json/data/?variable_name={{ variable_name }}&variable_value={{ variable_value }}").done(
+            function(report){
+                var option = {
+                                title: {
+                                    text: report['title']
+                                },
+                                tooltip: {},
+                                grid:{
+                                    left:'5%'
+                                },
+                                legend: {
+                                    type: 'scroll',
+                                    orient: 'vertical',
+                                    right: 10,
+                                    data: report['legend']
+                                },
+                                xAxis: {
+                                    data: report['workers']
+                                },
+                                yAxis: {},
+                                series: report['series']
+                };   
+
+                config_report_es.setOption(option)
+            }
+        );
+        </script>
+
+
+
+        <script>
+//        // 基于准备好的dom，初始化echarts实例
+//
+//
+//        // 指定图表的配置项和数据
+//        var option = {
+//            title: {
+//                text: 'autocommit性能测试'
+//            },
+//            tooltip: {},
+//            legend: {
+//                data:['olpt_insert']
+//            },
+//            xAxis: {
+//                data: ["on","off"]
+//            },
+//            yAxis: {},
+//            series: [{
+//                name: 'olpt_insert',
+//                type: 'bar',
+//                barMaxWidth:20,
+//                data: [2700,9500]
+//            }]
+//        };
+//
+//        // 使用刚指定的配置项和数据显示图表。
+//        myChart.setOption(option);
+        </script>
+{% endblock %}

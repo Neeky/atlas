@@ -8,7 +8,7 @@ class BenchCase(models.Model):
     """
     一个BenchCase对应一个测试项
     """
-    host_info               = models.ForeignKey(HostInfo,verbose_name='主机配置')
+    host_info               = models.ForeignKey(HostInfo,verbose_name='主机配置',related_name='cases',on_delete=models.CASCADE)
     mysql_version           = models.CharField('所测试的mysql版号',max_length=16,default='')
     variable_name           = models.CharField('测试项具体的variable名称',max_length=24,default='')
     bench_type              = models.CharField('测试类型:oltp_insert,oltp_delete ...',max_length=24,default='')
@@ -27,7 +27,7 @@ class BenchCaseInstance(models.Model):
     """
     BenchCaseInstance的每一次测试都对应BenchInstance中的一行
     """
-    bench_case              = models.ForeignKey(BenchCase,verbose_name='任务类型')
+    bench_case              = models.ForeignKey(BenchCase,verbose_name='任务类型',related_name='instances',on_delete=models.CASCADE)
     workers                 = models.PositiveIntegerField('并行度',default=1)
     variable_value          = models.CharField('variable值',max_length=16,default='')
     truncations_per_seconde = models.FloatField('每秒执行完成多少事务',default=0)
