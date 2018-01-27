@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'mysqlz.apps.MysqlzConfig',
     'mysqlbench.apps.MysqlbenchConfig',
     'users.apps.UsersConfig',
     'django.contrib.admin',

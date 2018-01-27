@@ -16,7 +16,7 @@
 
         <script>
             var config_report_es = echarts.init(document.getElementById('config_report'));
-            $.get("http://127.0.0.1:8080/mysqlbench/bench/case/json/data/?variable_name={{ variable_name }}").done(
+            $.get("http://127.0.0.1:8080/mysqlbench/bench/case/json/data/?variable_name={{ variable_name }}&workers={{ workers }}").done(
             function(report){
                 var option = {
                                 title: {

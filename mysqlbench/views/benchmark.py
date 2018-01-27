@@ -123,20 +123,21 @@ class BenchCaseInstanceAddition(View):
             return HttpResponse("the end")
             
 class BenchCaseReport(View):
-    def get(self,request):
+    def get(self,request,variable_name,workers):
         """
         """
-        print(request.GET)
-        variable_name=request.GET.get('variable_name','test_in_BenchCaseReport(View)')
-        return render(request,'mysqlbench/bench-case-report.html',context={ 'variable_name':variable_name},content_type="text/html")
+        #print(request.GET)
+        #variable_name=request.GET.get('variable_name','test_in_BenchCaseReport(View)')
+        return render(request,'mysqlbench/bench-case-report.html',context={ 'variable_name':variable_name,'workers':workers},content_type="text/html")
 
 class BenchCaseMultiReport(View):
-    def get(self,request):
+    def get(self,request,variable_name,variable_value):
         """
         """
-        print(request.GET)
-        variable_name=request.GET.get('variable_name','test_in_BenchCaseReport(View)')
-        variable_value=request.GET.get('variable_value','test_in_BenchCaseMultiReport(View)')
+        #print(request.GET)
+        print('this is -------BenchCaseMultiReport')
+        #variable_name=request.GET.get('variable_name','test_in_BenchCaseReport(View)')
+        #variable_value=request.GET.get('variable_value','test_in_BenchCaseMultiReport(View)')
         return render(request,'mysqlbench/bench-case-parallel-report.html',context={ 'variable_name':variable_name,'variable_value':variable_value},content_type="text/html")
 
 class BenchCaseJsonApi(View):
@@ -148,6 +149,9 @@ class BenchCaseJsonApi(View):
         #先从请求的报文中解析出mysql_version,variable_name
         mysql_version = request.GET.get('mysql_version','mysql-5.7.21')
         variable_name = request.GET.get('variable_name','log_bin')
+        workers       = request.GET.get('workers',1)
+        print(request.GET)
+        print(variable_name,workers)
         #找到对应的benchcase select_related().
         bench_cases = BenchCase.objects.filter(Q(mysql_version=mysql_version),Q(variable_name=variable_name))
         #缓存
@@ -155,7 +159,7 @@ class BenchCaseJsonApi(View):
         bench_types = [bc.bench_type for bc in bench_cases]
         #填充标题、填充图例
         result['legend1']=bench_types
-        result['title1'] ="{0} 各取值对性能的影响程度".format(variable_name)
+        result['title1'] ="{0} 各个取值在 {1} 个会话下的tps".format(variable_name,workers)
         #
         variable_values = []
         tpss=[]
@@ -165,9 +169,9 @@ class BenchCaseJsonApi(View):
             s['name']=bc.bench_type
             s['type']='bar'
             s['barMaxWidth']=20
-            instance = bc.instances.filter(workers=1)
+            instance = bc.instances.filter(workers=workers)
             variable_values=[i.variable_value for i in instance]
-            tpss = [i.truncations_per_seconde for i in instance]
+            tpss = [i.truncations_per_seconde + i.query_per_seconde for i in instance]
             s['data']=tpss
             series.append(s)
         result['series1']=series
@@ -184,6 +188,7 @@ class MultiWorkerJsonApi(View):
         
         """
         result={} 
+        result['workers']=None
         variable_name=request.GET.get('variable_name','log_bin')
         variable_value = request.GET.get('variable_value',None) 
         if variable_value == None:
@@ -201,8 +206,9 @@ class MultiWorkerJsonApi(View):
             print('this is 3 ------')
             bcis = BenchCaseInstance.objects.filter(bench_case=bc,variable_value=variable_value).order_by('workers')
             workers = [bci.workers for bci in bcis]
-            tps = [bci.truncations_per_seconde for bci in bcis]
-            result['workers']=workers
+            tps = [bci.truncations_per_seconde + bci.query_per_seconde for bci in bcis]
+            if result['workers'] == None or len(result['workers'])==0:
+                result['workers']=workers
             serie['data']=tps
             result['series'].append(serie)
         print(result)

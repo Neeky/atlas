@@ -10,7 +10,7 @@ class BenchCase(models.Model):
     """
     host_info               = models.ForeignKey(HostInfo,verbose_name='主机配置',related_name='cases',on_delete=models.CASCADE)
     mysql_version           = models.CharField('所测试的mysql版号',max_length=16,default='')
-    variable_name           = models.CharField('测试项具体的variable名称',max_length=24,default='')
+    variable_name           = models.CharField('测试项具体的variable名称',max_length=64,default='')
     bench_type              = models.CharField('测试类型:oltp_insert,oltp_delete ...',max_length=24,default='')
     detail                  = models.CharField('测试项的详细说明',max_length=256,default='')
 

@@ -15,7 +15,7 @@ class BenchCaseForm(ModelForm):
 class BenchCaseInstanceForm(ModelForm):
     class Meta(object):
         model=BenchCaseInstance
-        fields=['bench_case','workers','variable_value','truncations_per_seconde','duration']
+        fields=['bench_case','workers','variable_value','truncations_per_seconde','query_per_seconde','duration']
 
 
 
